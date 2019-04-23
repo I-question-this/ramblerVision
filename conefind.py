@@ -19,6 +19,8 @@ if __name__ == '__main__':
   capture = cv2.VideoCapture(0)
   capture.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
   capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+  # https://docs.opencv.org/2.4/modules/core/doc/old_basic_structures.html?highlight=createimage#IplImage*%20cvCreateImage(CvSize%20size,%20int%20depth,%20int%20channels)
+  # size, depth, channels 
   #polar = cv2.CreateImage((360, 360), 8, 3)
   polar = capture.read()
   #cropped = cv2.CreateImage((360, 40), 8, 3)
@@ -59,34 +61,34 @@ if __name__ == '__main__':
   #on_mouse(cv2.CV_EVENT_LBUTTONDOWN, img.width/2, img.height/2, None, None)
 
   #lower = cv2.Scalar(200, 100, 50) #apparently scalars are RGB even when the image is BGR?
-  lower = cv2.Scalar(50, 100, 200) 
-  upper = cv2.Scalar(100, 200, 255)
+  lower = cv2.scalar(50, 100, 200) 
+  upper = cv2.scalar(100, 200, 255)
 
   M = 69
 
   while True:
-    img = cv2.QueryFrame(capture)
-    cv2.LogPolar(img, polar, (centerX, centerY), M+1, cv2.CV_INTER_NN) #possible speedup - get subrect src
+    img = cv2.queryFrame(capture)
+    cv2.logPolar(img, polar, (centerX, centerY), M+1, cv2.CV_INTER_NN) #possible speedup - get subrect src
     #cropped = cv2.GetSubRect(polar,(280,0,40,360))
     #cv2.Transpose(cropped, cropped)
-    cv2.Transpose(cv2.GetSubRect(polar,(280,0,40,360)), cropped)
-    cv2.Flip(cropped) #just for viewing
+    cv2.transpose(cv2.GetSubRect(polar,(280,0,40,360)), cropped)
+    cv2.flip(cropped) #just for viewing
 
-    cv2.InRangeS(cropped, lower, upper, cones)
-    cv2.Erode(cones, cones) # just once might be too much
+    cv2.inRangeS(cropped, lower, upper, cones)
+    cv2.erode(cones, cones) # just once might be too much
 
-    k = cv2.CreateStructuringElementEx(3, 47, 1, 23, cv2.CV_SHAPE_RECT)
-    cv2.Dilate(cones, cones, k) 
+    k = cv2.createStructuringElementEx(3, 47, 1, 23, cv2.CV_SHAPE_RECT)
+    cv2.dilate(cones, cones, k) 
     
     #cv2.Split(cropped, bee, gee, arr, None)
     #cv2.CvtColor(cropped, hsvcopy, cv2.CV_BGR2HSV)
     #cv2.Split(hsvcopy, hue, sat, val, None)
 
-    cv2.ShowImage('cam', img)
+    cv2.imshow('cam', img)
     #cv2.ShowImage('polar', polar)
-    cv2.ShowImage('cones', cones)
+    cv2.imshow('cones', cones)
     #cv2.ShowImage('hsvcopy', hsvcopy)
-    cv2.ShowImage('unwrapped', cropped)
+    cv2.imshow('unwrapped', cropped)
 
     #cv2.ShowImage('hue', hue)
     #cv2.ShowImage('sat', sat)
@@ -98,7 +100,7 @@ if __name__ == '__main__':
 
 
     #print "(2,2) = ", arr[2,2], ", ", gee[2,2], ", ", bee[2,2]
-    key = cv2.WaitKey(30)
+    key = cv2.waitKey(30)
     #print "key ",key
     if key == 27:
         break
@@ -108,4 +110,6 @@ if __name__ == '__main__':
     elif key == 65364:
         print("M=",M+1)
         M = (M - 5)%100
-  cv2.DestroyAllWindows()
+  
+  cv2.release()
+  cv2.destroyAllWindows()
