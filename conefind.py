@@ -70,16 +70,20 @@ if __name__ == '__main__':
   M = 69
 
   while True:
-    img = cam.read()
+    result, img = cam.read()
+    if not result:
+      break
+
     # Flag was CV_INTER_NN before, but have no idea what that is.
     polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS) #possible speedup - get subrect src
     #cropped = cv2.GetSubRect(polar,(280,0,40,360))
     #cv2.Transpose(cropped, cropped)
-    cv2.transpose(cv2.GetSubRect(polar,(280,0,40,360)), cropped)
-    cv2.flip(cropped) #just for viewing
+    #cv2.transpose(cv2.getSubRect(polar,(280,0,40,360)), cropped)
+    cropped = cv2.transpose(polar[280:0,40:360])
+    cropped = cv2.flip(cropped, 1) #just for viewing
 
-    cv2.inRangeS(cropped, lower, upper, cones)
-    cv2.erode(cones, cones) # just once might be too much
+    cones = cv2.inRange(cropped, lower, upper)
+    cones = cv2.erode(cones) # just once might be too much
 
     k = cv2.createStructuringElementEx(3, 47, 1, 23, cv2.CV_SHAPE_RECT)
     cv2.dilate(cones, cones, k) 
