@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import cv2
+import numpy as np
 
 centerX = 160
 centerY = 120
@@ -16,20 +17,20 @@ def on_mouse(event, x, y, flags, param):
     #centerY = y
 
 if __name__ == '__main__':
-  capture = cv2.VideoCapture(0)
-  capture.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-  capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+  cam = cv2.VideoCapture(0)
+  cam.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+  cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
   # https://docs.opencv.org/2.4/modules/core/doc/old_basic_structures.html?highlight=createimage#IplImage*%20cvCreateImage(CvSize%20size,%20int%20depth,%20int%20channels)
   # size, depth, channels 
   #polar = cv2.CreateImage((360, 360), 8, 3)
-  polar = capture.read()
+  polar = cam.read()
   #cropped = cv2.CreateImage((360, 40), 8, 3)
-  cropped = capture.read()
+  cropped = cam.read()
   #hsvcopy = cv2.CreateImage((360, 40), 8, 3)
   #img = cv2.CreateImage((320, 240), 8, 3)
-  img = capture.read()
+  img = cam.read()
   #cones = cv2.CreateImage((360, 40), 8, 1)
-  cones = capture.read()
+  cones = cam.read()
   #arr = cv2.CreateImage((360, 40), 8, 1)
   #gee = cv2.CreateImage((360, 40), 8, 1)
   #bee = cv2.CreateImage((360, 40), 8, 1)
@@ -61,14 +62,17 @@ if __name__ == '__main__':
   #on_mouse(cv2.CV_EVENT_LBUTTONDOWN, img.width/2, img.height/2, None, None)
 
   #lower = cv2.Scalar(200, 100, 50) #apparently scalars are RGB even when the image is BGR?
-  lower = cv2.scalar(50, 100, 200) 
-  upper = cv2.scalar(100, 200, 255)
+  #lower = cv2.Scalar(50, 100, 200) 
+  #upper = cv2.Scalar(100, 200, 255)
+  lower = np.array([50, 100, 200])
+  upper = np.array([100, 200, 255])
 
   M = 69
 
   while True:
-    img = cv2.queryFrame(capture)
-    cv2.logPolar(img, polar, (centerX, centerY), M+1, cv2.CV_INTER_NN) #possible speedup - get subrect src
+    img = cam.read()
+    # Flag was CV_INTER_NN before, but have no idea what that is.
+    polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS) #possible speedup - get subrect src
     #cropped = cv2.GetSubRect(polar,(280,0,40,360))
     #cv2.Transpose(cropped, cropped)
     cv2.transpose(cv2.GetSubRect(polar,(280,0,40,360)), cropped)
