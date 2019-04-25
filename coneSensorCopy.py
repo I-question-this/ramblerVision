@@ -63,20 +63,21 @@ if __name__ == '__main__':
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
     polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS) #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
-    unwrapped = cv2.transpose(polar[0:280,40:360])
+    unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
     unwrapped = cv2.flip(unwrapped, 1)
 
     # generate 'cones' image using pixels from 'unwrapped' image which fall into range [lower, upper]
     cones = cv2.inRange(unwrapped, lower, upper)
     # de-noise the 1-bit per pixel output
-    ##cones = cv2.erode(cones) # just once might be too much
+    k = cv2.getStructuringElement(cv2.MORPH_RECT, (96, 38))
+    cones = cv2.erode(cones, k) # just once might be too much
     
     # Use a tall thin structure to dilate the remaining 'on' pixels,
     # eliminating beacon range information, and making it easy to see which bearings have 'beacon' in them.
-    ##k = cv2.getStructuringElement(3, 99, 1, 39, cv2.SHAPE_RECT)
-    ##cones = cv2.dilate(cones, k) 
-    
+    cones = cv2.dilate(cones, k) 
+   
+    print(cones.shape) 
     # Display the images from the three major steps of acquisition, transformation, and segmentation
     if args.gui:
       #if args.debug:
