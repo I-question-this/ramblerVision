@@ -48,8 +48,7 @@ if __name__ == '__main__':
   cones = np.zeros((360,40,1), np.uint8)
 
   if args.gui:
-    #if args.debug: 
-      #cv.NamedWindow('cam')
+    cv2.namedWindow('cam')
     cv2.namedWindow('unwrapped')
     cv2.namedWindow('cones')
     cv2.setMouseCallback('unwrapped', on_mouse)
@@ -77,14 +76,15 @@ if __name__ == '__main__':
     # eliminating beacon range information, and making it easy to see which bearings have 'beacon' in them.
     cones = cv2.dilate(cones, k) 
    
-    print(cones.shape) 
     # Display the images from the three major steps of acquisition, transformation, and segmentation
     if args.gui:
-      #if args.debug:
-        #cv.ShowImage('cam', img)
+      cv2.imshow('cam', img)
       cv2.imshow('unwrapped', unwrapped)
       cv2.imshow('cones', cones)
     
+    key = cv2.waitKey(30)
+    continue
+
     size = 0
     segments = 0
     if args.debug:
