@@ -34,10 +34,6 @@ if __name__ == '__main__':
   width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
   height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-  # center and depth of the polar coordinate transform
-  centerX = int(width/2)#160
-  centerY = int(height/2)#120
-
   bgr = [0, 0, 0]
   thresh = 40
  
@@ -67,10 +63,10 @@ if __name__ == '__main__':
     if not result:
       break
     # Crop the image to focus on the acorn nut
-    img = img[int(height*0.1):int(height*0.9), int(width*0.1):int(width*0.9)]
+    img = img[int(height*0.1):int(height*0.9), int(width*0.2):int(width*0.8)]
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
     # Remove the bottom 20% of the image since it is blank
-    polar = cv2.logPolar(img, (centerX, centerY), 70, cv2.WARP_FILL_OUTLIERS)#[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
+    polar = cv2.logPolar(img, (img.shape[0]/2, img.shape[1]/2), 70, cv2.WARP_FILL_OUTLIERS)#[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
     unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
