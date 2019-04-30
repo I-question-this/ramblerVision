@@ -4,21 +4,6 @@ import cv2, struct, argparse
 from datetime import datetime
 import numpy as np
 
-# center and depth of the polar coordinate transform
-centerX = int(360/2)#160
-centerY = int(360/2)#120
-M = 69
-
-## define "orange" in a simple way
-##lower = np.array([40, 100, 180])
-##upper = np.array([100, 180, 255])
-# Define the target color: black
-bgr = [250, 250, 250]
-thresh = 40
- 
-minBGR = np.array([bgr[0] - thresh, bgr[1] - thresh, bgr[2] - thresh])
-maxBGR = np.array([bgr[0] + thresh, bgr[1] + thresh, bgr[2] + thresh])
- 
 
 # mouse event callback
 def on_mouse(event, x, y, flags, param): 
@@ -40,18 +25,29 @@ if __name__ == '__main__':
   
   # open the first video4linux device with openCV, and ask it to be 320x240
   cam = cv2.VideoCapture(0)
-  cam.set(cv2.CAP_PROP_FRAME_WIDTH, 360)
-  cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
-  
+  width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
+  height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+  # center and depth of the polar coordinate transform
+  centerX = int(width/2)#160
+  centerY = int(height/2)#120
+  M = 69
+
+  bgr = [0, 0, 0]
+  thresh = 40
+ 
+  minBGR = np.array([bgr[0] - thresh, bgr[1] - thresh, bgr[2] - thresh])
+  maxBGR = np.array([bgr[0] + thresh, bgr[1] + thresh, bgr[2] + thresh])
+ 
   # Define some pixel canvases in memory
   #img = cv.CreateImage((320, 240), 8, 3)
-  img = np.zeros((360,360,3), np.uint8)
+  img = np.zeros((width,height,3), np.uint8)
   #polar = cv.CreateImage((360, 360), 8, 3)
-  polar = np.zeros((360,360,3), np.uint8)
+  polar = np.zeros((width,height,3), np.uint8)
   #unwrapped = cv.CreateImage((360, 40), 8, 3)
-  unwrapped = np.zeros((360,40,3), np.uint8)
+  unwrapped = np.zeros((width,40,3), np.uint8)
   #cones = cv.CreateImage((360, 40), 8, 1)
-  cones = np.zeros((360,40,1), np.uint8)
+  cones = np.zeros((width,40,1), np.uint8)
 
   if args.gui:
     cv2.namedWindow('cam')
