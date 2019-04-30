@@ -24,14 +24,13 @@ if __name__ == '__main__':
   #print "Opened "+cyril.portstr+" for serial access"
   
   # open the first video4linux device with openCV, and ask it to be 320x240
-  cam = cv2.VideoCapture(0)
+  cam = cv2.VideoCapture(1)
   width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
   height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
   # center and depth of the polar coordinate transform
   centerX = int(width/2)#160
   centerY = int(height/2)#120
-  M = 69
 
   bgr = [0, 0, 0]
   thresh = 40
@@ -51,7 +50,6 @@ if __name__ == '__main__':
 
   if args.gui:
     cv2.namedWindow('cam')
-    cv2.namedWindow('polar')
     cv2.namedWindow('unwrapped')
     cv2.namedWindow('cones')
     cv2.setMouseCallback('unwrapped', on_mouse)
@@ -62,9 +60,10 @@ if __name__ == '__main__':
     result, img = cam.read()
     if not result:
       break
+    img = img[int(height*0.1):int(height*0.9), int(width*0.1):int(width*0.9)]
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
     # Remove the bottom 20% of the image since it is blank
-    polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS)[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
+    polar = cv2.logPolar(img, (centerX, centerY), 70, cv2.WARP_FILL_OUTLIERS)[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
     unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
@@ -83,7 +82,6 @@ if __name__ == '__main__':
     # Display the images from the three major steps of acquisition, transformation, and segmentation
     if args.gui:
       cv2.imshow('cam', img)
-      cv2.imshow('polar', polar)
       cv2.imshow('unwrapped', unwrapped)
       cv2.imshow('cones', cones)
     
