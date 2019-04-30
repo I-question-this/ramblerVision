@@ -63,7 +63,8 @@ if __name__ == '__main__':
     if not result:
       break
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
-    polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS) #possible speedup - get subrect asap 
+    # Remove the bottom 20% of the image since it is blank
+    polar = cv2.logPolar(img, (centerX, centerY), M+1, cv2.WARP_FILL_OUTLIERS)[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
     unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
