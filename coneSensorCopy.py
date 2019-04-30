@@ -31,25 +31,12 @@ if __name__ == '__main__':
   cam.set(cv2.CAP_PROP_FRAME_WIDTH, 300)
   cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 320)
 
-  width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
-  height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
   bgr = [0, 0, 0]
   thresh = 40
  
   minBGR = np.array([bgr[0] - thresh, bgr[1] - thresh, bgr[2] - thresh])
   maxBGR = np.array([bgr[0] + thresh, bgr[1] + thresh, bgr[2] + thresh])
  
-  # Define some pixel canvases in memory
-  #img = cv.CreateImage((320, 240), 8, 3)
-  img = np.zeros((width,height,3), np.uint8)
-  #polar = cv.CreateImage((360, 360), 8, 3)
-  polar = np.zeros((width,height,3), np.uint8)
-  #unwrapped = cv.CreateImage((360, 40), 8, 3)
-  unwrapped = np.zeros((width,40,3), np.uint8)
-  #cones = cv.CreateImage((360, 40), 8, 1)
-  cones = np.zeros((width,40,1), np.uint8)
-
   if args.gui:
     cv2.namedWindow('cam')
     cv2.namedWindow('unwrapped')
@@ -62,11 +49,13 @@ if __name__ == '__main__':
     result, img = cam.read()
     if not result:
       break
+    
     # Crop the image to focus on the acorn nut
-    img = img[int(height*0.1):int(height*0.9), int(width*0.2):int(width*0.8)]
+    img = img[int(img.shape[0]*0.1):int(img.shape[0]*0.9), int(img.shape[1]*0.2):int(img.shape[1]*0.8)]
+    radius = np.sqrt((img.shape[0]**2)+(img.shape[1]**2))/2
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
     # Remove the bottom 20% of the image since it is blank
-    polar = cv2.logPolar(img, (img.shape[0]/2, img.shape[1]/2), 70, cv2.WARP_FILL_OUTLIERS)#[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
+    polar = cv2.linearPolar(img, (img.shape[0]/2, img.shape[1]/2), radius, cv2.WARP_FILL_OUTLIERS)#[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
     unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
