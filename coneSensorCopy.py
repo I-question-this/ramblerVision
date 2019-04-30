@@ -5,14 +5,20 @@ from datetime import datetime
 import numpy as np
 
 # center and depth of the polar coordinate transform
-centerX = 160
-centerY = 120
+centerX = int(360/2)#160
+centerY = int(360/2)#120
 M = 69
 
-# define "orange" in a simple way
-lower = np.array([40, 100, 180])
-upper = np.array([100, 180, 255])
-
+## define "orange" in a simple way
+##lower = np.array([40, 100, 180])
+##upper = np.array([100, 180, 255])
+# Define the target color: black
+bgr = [250, 250, 250]
+thresh = 40
+ 
+minBGR = np.array([bgr[0] - thresh, bgr[1] - thresh, bgr[2] - thresh])
+maxBGR = np.array([bgr[0] + thresh, bgr[1] + thresh, bgr[2] + thresh])
+ 
 
 # mouse event callback
 def on_mouse(event, x, y, flags, param): 
@@ -34,8 +40,8 @@ if __name__ == '__main__':
   
   # open the first video4linux device with openCV, and ask it to be 320x240
   cam = cv2.VideoCapture(0)
-  cam.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-  cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+  cam.set(cv2.CAP_PROP_FRAME_WIDTH, 360)
+  cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
   
   # Define some pixel canvases in memory
   #img = cv.CreateImage((320, 240), 8, 3)
@@ -49,6 +55,7 @@ if __name__ == '__main__':
 
   if args.gui:
     cv2.namedWindow('cam')
+    cv2.namedWindow('polar')
     cv2.namedWindow('unwrapped')
     cv2.namedWindow('cones')
     cv2.setMouseCallback('unwrapped', on_mouse)
@@ -67,7 +74,7 @@ if __name__ == '__main__':
     unwrapped = cv2.flip(unwrapped, 1)
 
     # generate 'cones' image using pixels from 'unwrapped' image which fall into range [lower, upper]
-    cones = cv2.inRange(unwrapped, lower, upper)
+    cones = cv2.inRange(unwrapped, minBGR, maxBGR)
     # de-noise the 1-bit per pixel output
     k = cv2.getStructuringElement(cv2.MORPH_RECT, (96, 38))
     cones = cv2.erode(cones, k) # just once might be too much
@@ -79,12 +86,13 @@ if __name__ == '__main__':
     # Display the images from the three major steps of acquisition, transformation, and segmentation
     if args.gui:
       cv2.imshow('cam', img)
+      cv2.imshow('polar', polar)
       cv2.imshow('unwrapped', unwrapped)
       cv2.imshow('cones', cones)
     
     key = cv2.waitKey(30)
     continue
-
+    print(cones.shape)
     size = 0
     segments = 0
     if args.debug:
@@ -123,24 +131,25 @@ if __name__ == '__main__':
     bearingstring = ""
     for b in bearings:
       bearingstring = bearingstring + "%03d," % b[0]
-
+    if args.debug:
+      print("Bearing string: %s" % bearingstring)
     # tell the cockroach what it wants to hear
-    cyril.write(struct.pack('cbbb', '\xfa', 0, 111, 0))
+    #cyril.write(struct.pack('cbbb', '\xfa', 0, 111, 0))
 
     # Data Logging with POSIX stdio!
-    if (cyril.inWaiting() > 0):
-      logdata = cyril.read(cyril.inWaiting())
-      a = 0
-      b = 0
-      for c in logdata:
-        if c == '\n':
-          now = datetime.now().time()
-          print("%02d,%02d,%02d,%03d,%d,%s,%s,%s" % \
-            (now.hour, now.minute, now.second, now.microsecond/1000, \
-            (now.hour*3600000 + now.minute*60000 + now.second*1000 + now.microsecond/1000), \
-            logdata[a:b-1], segments, bearingstring))
-          a = b + 1 # leapfrog the other counter every line
-        b = b + 1 # increment the counter every character
+    #if (cyril.inWaiting() > 0):
+    #  logdata = cyril.read(cyril.inWaiting())
+    #  a = 0
+    #  b = 0
+    #  for c in logdata:
+    #    if c == '\n':
+    #      now = datetime.now().time()
+    #      print("%02d,%02d,%02d,%03d,%d,%s,%s,%s" % \
+    #        (now.hour, now.minute, now.second, now.microsecond/1000, \
+    #        (now.hour*3600000 + now.minute*60000 + now.second*1000 + now.microsecond/1000), \
+    #        logdata[a:b-1], segments, bearingstring))
+    #      a = b + 1 # leapfrog the other counter every line
+    #    b = b + 1 # increment the counter every character
  
     key = cv.WaitKey(30)
     #print "key ",key
