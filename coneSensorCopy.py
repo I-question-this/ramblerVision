@@ -24,7 +24,13 @@ if __name__ == '__main__':
   #print "Opened "+cyril.portstr+" for serial access"
   
   # open the first video4linux device with openCV, and ask it to be 320x240
-  cam = cv2.VideoCapture(1)
+  cam = cv2.VideoCapture(0)
+
+  # Manually set height and width to allow easier
+  # reproducability 
+  cam.set(cv2.CAP_PROP_FRAME_WIDTH, 300)
+  cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 320)
+
   width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
   height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -60,10 +66,11 @@ if __name__ == '__main__':
     result, img = cam.read()
     if not result:
       break
+    # Crop the image to focus on the acorn nut
     img = img[int(height*0.1):int(height*0.9), int(width*0.1):int(width*0.9)]
     # using calibrated center, do a log-polar to cartesian transform using nearest-neighbors
     # Remove the bottom 20% of the image since it is blank
-    polar = cv2.logPolar(img, (centerX, centerY), 70, cv2.WARP_FILL_OUTLIERS)[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
+    polar = cv2.logPolar(img, (centerX, centerY), 70, cv2.WARP_FILL_OUTLIERS)#[0:width, 0:int(height*0.8)] #possible speedup - get subrect asap 
     # transpose the section we want from the polar result into the unwrapped image
     unwrapped = cv2.transpose(polar)
     #flip just for viewing - optional. TODO: make sure nothing is backwards
